@@ -1,0 +1,17 @@
+{
+  "name": "OBSIDIAN — Bot Hosting Control Panel",
+  "short_name": "OBSIDIAN",
+  "description": "High-performance pitch-black bot hosting & native server management panel for Node.js, Python, and custom bots.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

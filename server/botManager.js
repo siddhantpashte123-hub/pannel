@@ -176,9 +176,29 @@ class BotManager extends EventEmitter {
     const cmd = (bot.startupCommand || '').trim();
     if (!cmd) throw new Error('Startup command is empty');
 
+    let launchCmd = cmd;
+    const pkgPath = path.join(botDir, 'package.json');
+    const nmPath = path.join(botDir, 'node_modules');
+    if (fs.existsSync(pkgPath) && !fs.existsSync(nmPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        const hasDeps =
+          (pkg.dependencies && Object.keys(pkg.dependencies).length > 0) ||
+          (pkg.devDependencies && Object.keys(pkg.devDependencies).length > 0);
+        if (hasDeps) {
+          this.appendLog(
+            botId,
+            'system',
+            '[OBSIDIAN] node_modules missing — auto-installing dependencies from package.json...'
+          );
+          launchCmd = `npm install --no-audit --no-fund && ${cmd}`;
+        }
+      } catch {}
+    }
+
     this.appendLog(botId, 'system', `[OBSIDIAN] Starting native runtime: ${cmd}`);
 
-    const child = spawn('/bin/bash', ['-lc', cmd], {
+    const child = spawn('/bin/bash', ['-lc', launchCmd], {
       cwd: botDir,
       env: this._buildSafeEnv(bot),
       detached: true,
