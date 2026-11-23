@@ -1,0 +1,22 @@
+{
+  "name": "obsidian-panel",
+  "version": "1.0.0",
+  "description": "Premium Docker-free Bot Hosting & Server Management Panel",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "install:all": "npm install && npm --prefix client install"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.5.0",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
