@@ -11,7 +11,7 @@ const { getDirSizeBytes } = require('../systemStats');
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024, files: 500 },
 });
 
 function loadBotAccess(req, res, next) {
@@ -189,20 +189,70 @@ router.delete('/:id/files', requireAuth, loadBotAccess, (req, res) => {
   }
 });
 
-router.post('/:id/files/upload', requireAuth, loadBotAccess, upload.array('files', 20), (req, res) => {
+router.post('/:id/files/upload', requireAuth, loadBotAccess, upload.array('files', 500), (req, res) => {
   try {
-    const targetDir = String(req.body?.dir || '');
+    const targetDir = String(req.body?.dir || '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    const autoExtract = req.body?.autoExtract === 'true' || req.body?.autoExtract === true;
+    let relativePaths = [];
+    if (req.body?.relativePaths) {
+      try {
+        const parsed = JSON.parse(req.body.relativePaths);
+        if (Array.isArray(parsed)) relativePaths = parsed;
+      } catch {}
+    }
+
     const uploaded = [];
-    for (const file of req.files || []) {
-      const cleanName = path.basename(file.originalname);
-      const rel = targetDir ? path.posix.join(targetDir, cleanName) : cleanName;
+    const extracted = [];
+    const files = req.files || [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const rawRel = relativePaths[i] ? String(relativePaths[i]) : file.originalname;
+      const safeRelParts = rawRel
+        .replace(/\\/g, '/')
+        .split('/')
+        .filter((seg) => seg && seg !== '.' && seg !== '..');
+      const cleanRel = safeRelParts.length > 0 ? safeRelParts.join('/') : path.basename(file.originalname);
+
+      const rel = targetDir ? path.posix.join(targetDir, cleanRel) : cleanRel;
       const { target } = fileManager.resolveBotPath(req.bot.id, rel);
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, file.buffer);
       uploaded.push(rel);
+
+      if (autoExtract && fileManager.isArchiveName(rel)) {
+        const resExtract = fileManager.extractArchive(req.bot.id, rel);
+        extracted.push(resExtract);
+      }
     }
-    db.addAudit(req.user, 'FILES_UPLOADED', req.bot.name, `Uploaded ${uploaded.length} file(s)`);
-    res.json({ ok: true, uploaded });
+
+    db.addAudit(
+      req.user,
+      'FILES_UPLOADED',
+      req.bot.name,
+      `Uploaded ${uploaded.length} file(s)` + (extracted.length ? `, extracted ${extracted.length} archive(s)` : '')
+    );
+    res.json({ ok: true, uploaded, extracted });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/:id/files/extract', requireAuth, loadBotAccess, (req, res) => {
+  try {
+    const { path: archivePath, destination, deleteAfter } = req.body || {};
+    if (!archivePath) return res.status(400).json({ error: 'Archive path is required' });
+    const result = fileManager.extractArchive(req.bot.id, archivePath, destination);
+    if (deleteAfter) {
+      fileManager.deleteEntry(req.bot.id, archivePath);
+    }
+    db.addAudit(
+      req.user,
+      'ARCHIVE_EXTRACTED',
+      req.bot.name,
+      `Extracted ${archivePath} (${result.extractedCount} items) into ${result.destination}`
+    );
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
