@@ -10,6 +10,7 @@
     "install:all": "npm install && npm --prefix client install"
   },
   "dependencies": {
+    "adm-zip": "^0.6.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
