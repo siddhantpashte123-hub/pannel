@@ -6,10 +6,10 @@ import {
   Cpu,
   KeyRound,
   LogOut,
-  Terminal,
   Sparkles,
 } from 'lucide-react';
 import IconButton from './IconButton';
+import ObsidianLogo from './ObsidianLogo';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ activeView, onNavigate }) {
@@ -24,15 +24,16 @@ export default function Sidebar({ activeView, onNavigate }) {
           onClick={() => onNavigate('bots')}
           className="flex items-center gap-3 px-2 py-1.5 cursor-pointer group"
         >
-          <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.08)] group-hover:bg-white group-hover:text-black transition-all duration-300">
-            <Terminal size={18} className="text-white group-hover:text-black transition-colors" />
-          </div>
+          <ObsidianLogo
+            size={38}
+            className="shrink-0 shadow-[0_0_22px_rgba(255,255,255,0.12)] group-hover:scale-105 group-hover:shadow-[0_0_26px_rgba(255,255,255,0.28)] transition-all duration-300 rounded-xl"
+          />
           <div>
-            <div className="text-sm font-bold tracking-[0.2em] text-white uppercase">
+            <div className="text-sm font-bold tracking-[0.22em] text-white uppercase">
               {settings?.panelName || 'OBSIDIAN'}
             </div>
-            <div className="text-[10px] font-mono tracking-widest text-zinc-500">
-              NO-DOCKER · PORT 2222
+            <div className="text-[10px] font-mono tracking-[0.18em] text-zinc-500">
+              BOT HOSTING
             </div>
           </div>
         </div>

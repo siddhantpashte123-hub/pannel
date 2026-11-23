@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Terminal, ArrowRight, Lock, User } from 'lucide-react';
+import { ArrowRight, Lock, User } from 'lucide-react';
+import ObsidianLogo from '../components/ObsidianLogo';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -26,14 +27,15 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black obsidian-grid-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md obsidian-card rounded-3xl p-8 border border-white/15 animate-scale-in">
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.06] border border-white/20 flex items-center justify-center mb-4 shadow-[0_0_35px_rgba(255,255,255,0.12)]">
-            <Terminal size={26} className="text-white" />
-          </div>
+          <ObsidianLogo
+            size={58}
+            className="mb-4 shadow-[0_0_35px_rgba(255,255,255,0.16)] rounded-2xl"
+          />
           <h1 className="text-xl font-bold tracking-[0.28em] text-white uppercase">
             {settings?.panelName || 'OBSIDIAN'}
           </h1>
-          <p className="text-xs font-mono tracking-widest text-zinc-500 mt-1">
-            NATIVE BOT HOSTING · PORT 2222
+          <p className="text-xs font-mono tracking-[0.2em] text-zinc-500 mt-1">
+            BOT HOSTING CONTROL PANEL
           </p>
         </div>
 
